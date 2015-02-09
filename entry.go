@@ -24,7 +24,7 @@ type EntryIndex struct {
 
 func (e Entry) Index() EntryIndex {
 	var ei EntryIndex
-	ei.Index.Index = "elastilog-" + e.Timestamp.Format("2006.01.02")
+	ei.Index.Index = "logstash-" + e.Timestamp.Format("2006.01.02")
 	ei.Index.Type = "logs"
 	return ei
 }
