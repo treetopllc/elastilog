@@ -2,6 +2,7 @@ package elastilog
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -32,6 +33,11 @@ func NewClient(hostURI string, tags ...string) Client {
 	return c
 }
 
+type elasticStatus struct {
+	Took   int  `json:"took"`
+	Errors bool `json:"errors"`
+}
+
 func (c *client) writemsgs(msgs []Entry) {
 	msgBytes := make([][]byte, 0, len(msgs))
 	for _, msg := range msgs {
@@ -52,9 +58,22 @@ func (c *client) writemsgs(msgs []Entry) {
 	}
 
 	defer res.Body.Close()
+
 	if res.StatusCode != http.StatusOK {
-		resp, _ := ioutil.ReadAll(res.Body)
-		fmt.Printf("Error writing to log: %v (%v)\n", string(resp), res.StatusCode)
+		fmt.Printf("Error writing to log: Status %v\n", res.StatusCode)
+		return
+	}
+
+	resp, _ := ioutil.ReadAll(res.Body)
+	var status elasticStatus
+	err = json.Unmarshal(resp, &status)
+	if err != nil {
+		fmt.Printf("Error writing to log: %v (%v)\n", string(resp), err)
+		return
+	}
+	if status.Errors {
+		fmt.Printf("Error writing to log: %v\n", string(resp))
+		return
 	}
 }
 func (c *client) Flush() {
