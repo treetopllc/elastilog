@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type Attributes map[string]interface{}
+type Attributes map[string]string
 
 type Entry struct {
 	Timestamp  time.Time  `json:"@timestamp"`
@@ -35,10 +35,10 @@ func (e Entry) BulkString() (string, error) {
 		return "", err
 	}
 	if len(e.Attributes) > 0 {
-		for k, attr := range e.Attributes {
+		/*for k, attr := range e.Attributes {
 			b, _ := json.Marshal(attr)
 			e.Attributes[k] = string(b)
-		}
+		}*/
 		aBytes, err := json.Marshal(e.Attributes)
 		if err != nil {
 			return "", err

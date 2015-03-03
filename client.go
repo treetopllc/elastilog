@@ -39,6 +39,11 @@ type elasticStatus struct {
 }
 
 func (c *client) writemsgs(msgs []Entry) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Printf("Panic writing log: %s", err)
+		}
+	}()
 	msgBytes := make([][]byte, 0, len(msgs))
 	for _, msg := range msgs {
 		msg.Tags = append(msg.Tags, c.tags...)
